@@ -1,0 +1,4 @@
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@color/savdo_background" />
+    <item android:width="88dp" android:height="88dp" android:gravity="center" android:drawable="@drawable/ic_savdo" />
+</layer-list>

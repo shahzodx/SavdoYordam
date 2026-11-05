@@ -1,0 +1,47 @@
+name: verify
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  api:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:18.6
+        env:
+          POSTGRES_PASSWORD: test-only-password
+        ports: ['5432:5432']
+        options: --health-cmd pg_isready --health-interval 5s --health-timeout 3s --health-retries 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: services/api/go.mod
+          cache-dependency-path: services/api/go.sum
+      - run: go test -race ./...
+        working-directory: services/api
+        env:
+          TEST_DATABASE_URL: postgres://postgres:test-only-password@localhost:5432/postgres?sslmode=disable
+      - run: go vet ./...
+        working-directory: services/api
+  mobile:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.47.9'
+          channel: stable
+          cache: true
+      - name: Install Android build dependencies
+        run: sdkmanager 'platforms;android-36' 'platforms;android-35' 'build-tools;36.0.0' 'ndk;28.2.13676358' 'cmake;3.22.1'
+      - run: flutter pub get && flutter analyze && flutter test && flutter build apk --debug
+        working-directory: apps/mobile
+      - uses: actions/upload-artifact@v4
+        with:
+          name: savdoyordam-debug-apk
+          path: apps/mobile/build/app/outputs/flutter-apk/app-debug.apk

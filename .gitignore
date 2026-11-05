@@ -1,0 +1,17 @@
+.env
+.tools/
+.cache/
+.dart_tool/
+build/
+*.log
+apps/mobile/android/local.properties
+apps/mobile/android/key.properties
+*.jks
+*.keystore
+coverage/
+services/api/api
+artifacts/*.apk
+# Integration credentials and Android Firebase project config
+service-account*.json
+google-services.json
+*.identity
